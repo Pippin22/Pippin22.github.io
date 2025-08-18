@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+
 <html>
 <head>
   <meta charset="UTF-8">
@@ -124,7 +124,7 @@
   </div>
 
   <script>
-    var ADMIN_PIN = localStorage.getItem("admin_pin") || "1234";
+    var ADMIN_PIN = 9999 localStorage.getItem("admin_pin") || "1234";
     var STORAGE_KEY = "kids_videos_v4";
     var videoList = document.getElementById("videoList");
     var form = document.getElementById("videoForm");
