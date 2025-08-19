@@ -9,14 +9,15 @@
     h1 { text-align:center; }
     #adminSection { display:none; margin-bottom:1rem; }
     #videoList { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; }
-    .videoCard { background:#fff; border:1px solid #ccc; border-radius:6px; overflow:hidden; width:200px; position:relative; }
-    .videoCard img { width:100%; display:block; }
+    .videoCard { background:#fff; border:1px solid #ccc; border-radius:6px; overflow:hidden; width:300px; position:relative; }
+    .videoCard img, .videoCard iframe { width:100%; display:block; }
     .videoCard .title { padding:5px; font-size:14px; font-weight:bold; text-align:center; }
     .lockOverlay {
       position:absolute; top:0; left:0; right:0; bottom:0;
       background:rgba(0,0,0,0.5); color:#fff;
       display:flex; align-items:center; justify-content:center;
       font-size:20px; font-weight:bold;
+      cursor:pointer;
     }
     button, input { padding:8px; margin-top:5px; }
   </style>
@@ -43,10 +44,10 @@
 
   <script>
     var PASSCODE = "9999";
-    var STORAGE_KEY = "kids_videos_v3";
+    var STORAGE_KEY = "kids_videos_v4";
     var videos = [];
 
-    // Load saved
+    // Load saved videos
     try {
       var saved = localStorage.getItem(STORAGE_KEY);
       if (saved) videos = JSON.parse(saved);
@@ -71,64 +72,19 @@
         var card = document.createElement("div");
         card.className = "videoCard";
 
-        var thumb = document.createElement("img");
-        thumb.src = "https://img.youtube.com/vi/" + v.vid + "/hqdefault.jpg";
-        card.appendChild(thumb);
-
         var title = document.createElement("div");
         title.className = "title";
         title.textContent = v.title;
         card.appendChild(title);
 
         if (v.locked) {
+          var thumb = document.createElement("img");
+          thumb.src = "https://img.youtube.com/vi/" + v.vid + "/hqdefault.jpg";
+          card.appendChild(thumb);
+
           var overlay = document.createElement("div");
           overlay.className = "lockOverlay";
           overlay.textContent = "🔒 Locked";
-          card.appendChild(overlay);
-
-          card.onclick = (function(id){
+          overlay.onclick = (function(id){
             return function() {
               var pin = prompt("Enter unlock PIN:");
-              if (pin === PASSCODE) {
-                for (var k=0;k<videos.length;k++){ if(videos[k].id==id) videos[k].locked=false; }
-                save(); render();
-              } else { alert("Wrong PIN"); }
-            };
-          })(v.id);
-        } else {
-          card.onclick = (function(vid){
-            return function() {
-              window.open("https://www.youtube.com/watch?v=" + vid, "_blank");
-            };
-          })(v.vid);
-        }
-
-        container.appendChild(card);
-      }
-    }
-
-    // Add video form
-    document.getElementById("videoForm").onsubmit = function(e){
-      e.preventDefault();
-      var url = document.getElementById("url").value;
-      var title = document.getElementById("title").value || "Untitled";
-      var vid = extractYouTubeId(url);
-      if (!vid) { alert("Invalid YouTube URL"); return; }
-      videos.unshift({id: new Date().getTime(), vid: vid, title: title, locked: true});
-      save(); render(); this.reset();
-    };
-
-    function checkPass() {
-      var entered = document.getElementById("adminPass").value;
-      if (entered === PASSCODE) {
-        document.getElementById("adminSection").style.display = "block";
-        document.getElementById("loginSection").style.display = "none";
-      } else {
-        alert("Wrong passcode");
-      }
-    }
-
-    render();
-  </script>
-</body>
-</html>
