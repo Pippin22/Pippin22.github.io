@@ -44,7 +44,7 @@
 
   <script>
     var PASSCODE = "9999";
-    var STORAGE_KEY = "kids_videos_v4";
+    var STORAGE_KEY = "kids_videos_v5";
     var videos = [];
 
     // Load saved videos
@@ -58,9 +58,9 @@
     }
 
     function extractYouTubeId(url) {
-      if (url.indexOf("youtu.be/") !== -1) return url.split("youtu.be/")[1].split(/[?&]/)[0];
-      if (url.indexOf("watch?v=") !== -1) return url.split("watch?v=")[1].split("&")[0];
-      if (url.indexOf("shorts/") !== -1) return url.split("shorts/")[1].split(/[?&]/)[0];
+      if (url.includes("youtu.be/")) return url.split("youtu.be/")[1].split(/[?&]/)[0];
+      if (url.includes("watch?v=")) return url.split("watch?v=")[1].split("&")[0];
+      if (url.includes("shorts/")) return url.split("shorts/")[1].split(/[?&]/)[0];
       return null;
     }
 
@@ -88,3 +88,51 @@
           overlay.onclick = (function(id){
             return function() {
               var pin = prompt("Enter unlock PIN:");
+              if (pin === PASSCODE) {
+                for (var k=0;k<videos.length;k++){ if(videos[k].id==id) videos[k].locked=false; }
+                save(); render();
+              } else { alert("Wrong PIN"); }
+            };
+          })(v.id);
+          card.appendChild(overlay);
+
+        } else {
+          var iframe = document.createElement("iframe");
+          iframe.width = "100%";
+          iframe.height = "200";
+          iframe.src = "https://www.youtube-nocookie.com/embed/" + v.vid + "?rel=0&modestbranding=1&controls=1";
+          iframe.title = v.title;
+          iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+          iframe.allowFullscreen = true;
+          card.appendChild(iframe);
+        }
+
+        container.appendChild(card);
+      }
+    }
+
+    // Add video form
+    document.getElementById("videoForm").onsubmit = function(e){
+      e.preventDefault();
+      var url = document.getElementById("url").value;
+      var title = document.getElementById("title").value || "Untitled";
+      var vid = extractYouTubeId(url);
+      if (!vid) { alert("Invalid YouTube URL"); return; }
+      videos.unshift({id: new Date().getTime(), vid: vid, title: title, locked: true});
+      save(); render(); this.reset();
+    };
+
+    function checkPass() {
+      var entered = document.getElementById("adminPass").value;
+      if (entered === PASSCODE) {
+        document.getElementById("adminSection").style.display = "block";
+        document.getElementById("loginSection").style.display = "none";
+      } else {
+        alert("Wrong passcode");
+      }
+    }
+
+    render();
+  </script>
+</body>
+</html>
