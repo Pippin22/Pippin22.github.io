@@ -1,4 +1,4 @@
-
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -12,8 +12,7 @@
     }
     .folderCard {
       width:120px; height:100px;
-      background:#fff;
-      border-radius:12px;
+      background:#fff; border-radius:12px;
       box-shadow:0 4px 8px rgba(0,0,0,0.1);
       display:flex; flex-direction:column;
       justify-content:center; align-items:center;
@@ -47,4 +46,246 @@
       background:#4CAF50; color:white;
       border:none; border-radius:50%;
       font-size:28px; font-weight:bold;
-      box-shadow:0 4px 8px rgba
+      box-shadow:0 4px 8px rgba(0,0,0,0.2);
+      cursor:pointer; display:flex; justify-content:center; align-items:center;
+    }
+    #homeBtn {
+      position:fixed; top:10px; left:10px;
+      background:#2196F3; color:white;
+      border:none; padding:8px 14px;
+      border-radius:6px; font-size:14px;
+      cursor:pointer; display:none;
+    }
+    #adminSection { display:none; margin-top:60px; }
+  </style>
+</head>
+<body>
+  <h1>🎒 Kids Video Locker</h1>
+
+  <button id="homeBtn" onclick="showAllVideos()">🏠 Home</button>
+
+  <div id="adminSection">
+    <form id="videoForm">
+      <input type="text" id="url" placeholder="YouTube link" required style="width:100%;"><br>
+      <input type="text" id="title" placeholder="Title (optional)" style="width:100%;"><br>
+      <input type="text" id="folder" placeholder="Folder name (optional)" style="width:100%;"><br>
+      <button type="submit">Add Video</button>
+    </form>
+  </div>
+
+  <div id="videoContainer"></div>
+  <div id="foldersContainer" style="display:none;"></div>
+
+  <button id="addBtn" onclick="showAddForm()">+</button>
+
+  <script>
+    var STORAGE_KEY = "kids_videos_with_folders";
+    var videos = [];
+
+    try {
+      var saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        videos = JSON.parse(saved);
+        // Migration: ensure a folder value exists
+        videos = videos.map(v => { if (!v.folder) v.folder = "General"; return v; });
+      }
+    } catch(e){ videos = []; }
+
+    function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(videos)); }
+
+    function extractYouTubeId(url) {
+      if (url.includes("youtu.be/")) return url.split("youtu.be/")[1].split(/[?&]/)[0];
+      if (url.includes("watch?v=")) return url.split("watch?v=")[1].split("&")[0];
+      if (url.includes("shorts/")) return url.split("shorts/")[1].split(/[?&]/)[0];
+      return null;
+    }
+
+    // Render all videos on main screen
+    function showAllVideos() {
+      document.getElementById("foldersContainer").style.display = "none";
+      document.getElementById("videoContainer").style.display = "flex";
+      document.getElementById("adminSection").style.display = "none";
+      document.getElementById("homeBtn").style.display = "none";
+      document.getElementById("addBtn").style.display = "flex";
+
+      var container = document.getElementById("videoContainer");
+      container.innerHTML = "";
+
+      if (videos.length === 0) {
+        container.innerHTML = "<p style='text-align:center;width:100%'>No videos yet. Use + to add some!</p>";
+        return;
+      }
+
+      videos.forEach(v => {
+        var card = document.createElement("div");
+        card.className = "videoCard";
+
+        var title = document.createElement("div");
+        title.className = "title";
+        title.textContent = v.title;
+        card.appendChild(title);
+
+        if (v.locked) {
+          var thumb = document.createElement("img");
+          thumb.src = "https://img.youtube.com/vi/" + v.vid + "/hqdefault.jpg";
+          card.appendChild(thumb);
+
+          var overlay = document.createElement("div");
+          overlay.className = "lockOverlay";
+          overlay.textContent = "🔒 Locked";
+          overlay.onclick = function(id){
+            return function() {
+              var pin = prompt("Enter PIN (9999):");
+              if (pin === "9999") {
+                videos = videos.map(x => x.id==id ? {...x, locked:false} : x);
+                save(); showAllVideos();
+              } else { alert("Wrong PIN"); }
+            };
+          }(v.id);
+          card.appendChild(overlay);
+
+        } else {
+          var iframe = document.createElement("iframe");
+          iframe.width = "100%";
+          iframe.height = "200";
+          iframe.src = "https://www.youtube-nocookie.com/embed/" + v.vid + "?rel=0&modestbranding=1&controls=1";
+          iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+          iframe.allowFullscreen = true;
+          card.appendChild(iframe);
+        }
+
+        var removeBtn = document.createElement("button");
+        removeBtn.className = "removeBtn";
+        removeBtn.textContent = "X";
+        removeBtn.onclick = function(id){
+          return function() {
+            if (confirm("Remove this video?")) {
+              videos = videos.filter(v => v.id !== id);
+              save(); showAllVideos();
+            }
+          };
+        }(v.id);
+        card.appendChild(removeBtn);
+
+        container.appendChild(card);
+      });
+    }
+
+    // Render folders (when user wants to see them)
+    function showFolders() {
+      document.getElementById("videoContainer").style.display = "none";
+      document.getElementById("adminSection").style.display = "none";
+      document.getElementById("foldersContainer").style.display = "flex";
+      document.getElementById("homeBtn").style.display = "block";
+      document.getElementById("addBtn").style.display = "flex";
+
+      var container = document.getElementById("foldersContainer");
+      container.innerHTML = "";
+
+      var folderNames = [...new Set(videos.map(v => v.folder))];
+
+      folderNames.forEach(folderName => {
+        var card = document.createElement("div");
+        card.className = "folderCard";
+        card.onclick = function(){ showFolderContents(folderName); };
+
+        var icon = document.createElement("div");
+        icon.className = "folderIcon";
+        icon.textContent = "📁";
+        card.appendChild(icon);
+
+        var nameDiv = document.createElement("div");
+        nameDiv.className = "folderName";
+        nameDiv.textContent = folderName;
+        card.appendChild(nameDiv);
+
+        container.appendChild(card);
+      });
+    }
+
+    function showFolderContents(folderName) {
+      document.getElementById("foldersContainer").style.display = "none";
+      document.getElementById("videoContainer").style.display = "flex";
+      document.getElementById("homeBtn").style.display = "block";
+
+      var container = document.getElementById("videoContainer");
+      container.innerHTML = "";
+
+      videos.filter(v => v.folder === folderName).forEach(v => {
+        var card = document.createElement("div");
+        card.className = "videoCard";
+
+        var title = document.createElement("div");
+        title.className = "title";
+        title.textContent = v.title;
+        card.appendChild(title);
+
+        if (v.locked) {
+          var thumb = document.createElement("img");
+          thumb.src = "https://img.youtube.com/vi/" + v.vid + "/hqdefault.jpg";
+          card.appendChild(thumb);
+
+          var overlay = document.createElement("div");
+          overlay.className = "lockOverlay";
+          overlay.textContent = "🔒 Locked";
+          overlay.onclick = function(id){
+            return function() {
+              var pin = prompt("Enter PIN (9999):");
+              if (pin === "9999") {
+                videos = videos.map(x => x.id==id ? {...x, locked:false} : x);
+                save(); showFolderContents(folderName);
+              } else { alert("Wrong PIN"); }
+            };
+          }(v.id);
+          card.appendChild(overlay);
+        } else {
+          var iframe = document.createElement("iframe");
+          iframe.width = "100%";
+          iframe.height = "200";
+          iframe.src = "https://www.youtube-nocookie.com/embed/" + v.vid + "?rel=0&modestbranding=1&controls=1";
+          iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+          iframe.allowFullscreen = true;
+          card.appendChild(iframe);
+        }
+
+        var removeBtn = document.createElement("button");
+        removeBtn.className = "removeBtn";
+        removeBtn.textContent = "X";
+        removeBtn.onclick = function(id){
+          return function() {
+            if (confirm("Remove this video?")) {
+              videos = videos.filter(v => v.id !== id);
+              save(); showFolderContents(folderName);
+            }
+          };
+        }(v.id);
+        card.appendChild(removeBtn);
+
+        container.appendChild(card);
+      });
+    }
+
+    function showAddForm() {
+      document.getElementById("adminSection").style.display = "block";
+      document.getElementById("videoContainer").style.display = "none";
+      document.getElementById("foldersContainer").style.display = "none";
+      document.getElementById("homeBtn").style.display = "block";
+      document.getElementById("addBtn").style.display = "none";
+    }
+
+    document.getElementById("videoForm").onsubmit = function(e){
+      e.preventDefault();
+      var url = document.getElementById("url").value;
+      var title = document.getElementById("title").value || "Untitled";
+      var folder = document.getElementById("folder").value || "General";
+      var vid = extractYouTubeId(url);
+      if (!vid) { alert("Invalid YouTube URL"); return; }
+      videos.unshift({id: new Date().getTime(), vid: vid, title: title, folder: folder, locked: true});
+      save(); showAllVideos();
+    };
+
+    // ✅ Default to all videos on load
+    showAllVideos();
+  </script>
+</body>
+</html>
