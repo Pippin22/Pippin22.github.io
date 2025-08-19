@@ -8,16 +8,24 @@
     body { font-family: Arial, sans-serif; background:#f0f0f0; margin:0; padding:1rem; }
     h1 { text-align:center; }
     #adminSection { display:none; margin-bottom:1rem; }
-    #videoList div { background:#fff; margin:10px 0; padding:10px; border:1px solid #ccc; }
+    #videoList { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; }
+    .videoCard { background:#fff; border:1px solid #ccc; border-radius:6px; overflow:hidden; width:200px; position:relative; }
+    .videoCard img { width:100%; display:block; }
+    .videoCard .title { padding:5px; font-size:14px; font-weight:bold; text-align:center; }
+    .lockOverlay {
+      position:absolute; top:0; left:0; right:0; bottom:0;
+      background:rgba(0,0,0,0.5); color:#fff;
+      display:flex; align-items:center; justify-content:center;
+      font-size:20px; font-weight:bold;
+    }
     button, input { padding:8px; margin-top:5px; }
-    .locked { color:red; font-weight:bold; }
   </style>
 </head>
 <body>
   <h1>🎒 Kids Video Locker</h1>
 
   <!-- Admin login -->
-  <div id="loginSection">
+  <div id="loginSection" style="text-align:center;margin-bottom:1rem;">
     <input type="password" id="adminPass" placeholder="Enter passcode">
     <button onclick="checkPass()">Unlock Add Video</button>
   </div>
@@ -35,7 +43,7 @@
 
   <script>
     var PASSCODE = "9999";
-    var STORAGE_KEY = "kids_videos_v2";
+    var STORAGE_KEY = "kids_videos_v3";
     var videos = [];
 
     // Load saved
@@ -60,20 +68,25 @@
       container.innerHTML = "";
       for (var i=0;i<videos.length;i++) {
         var v = videos[i];
-        var div = document.createElement("div");
+        var card = document.createElement("div");
+        card.className = "videoCard";
+
+        var thumb = document.createElement("img");
+        thumb.src = "https://img.youtube.com/vi/" + v.vid + "/hqdefault.jpg";
+        card.appendChild(thumb);
+
         var title = document.createElement("div");
-        title.innerHTML = "<b>" + v.title + "</b>";
-        div.appendChild(title);
+        title.className = "title";
+        title.textContent = v.title;
+        card.appendChild(title);
 
         if (v.locked) {
-          var lockMsg = document.createElement("div");
-          lockMsg.innerHTML = "🔒 Locked";
-          lockMsg.className = "locked";
-          div.appendChild(lockMsg);
+          var overlay = document.createElement("div");
+          overlay.className = "lockOverlay";
+          overlay.textContent = "🔒 Locked";
+          card.appendChild(overlay);
 
-          var btn = document.createElement("button");
-          btn.innerHTML = "Unlock";
-          btn.onclick = (function(id){
+          card.onclick = (function(id){
             return function() {
               var pin = prompt("Enter unlock PIN:");
               if (pin === PASSCODE) {
@@ -82,16 +95,15 @@
               } else { alert("Wrong PIN"); }
             };
           })(v.id);
-          div.appendChild(btn);
         } else {
-          var link = document.createElement("a");
-          link.href = "https://www.youtube.com/watch?v=" + v.vid;
-          link.target = "_blank";
-          link.innerHTML = "▶ Play Video";
-          div.appendChild(link);
+          card.onclick = (function(vid){
+            return function() {
+              window.open("https://www.youtube.com/watch?v=" + vid, "_blank");
+            };
+          })(v.vid);
         }
 
-        container.appendChild(div);
+        container.appendChild(card);
       }
     }
 
