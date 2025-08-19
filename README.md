@@ -33,6 +33,13 @@
     }
     .videoCard img, .videoCard iframe { width:100%; display:block; }
     .videoCard .title { padding:5px; font-size:14px; font-weight:bold; text-align:center; }
+    .lockOverlay {
+      position:absolute; top:0; left:0; right:0; bottom:0;
+      background:rgba(0,0,0,0.5); color:#fff;
+      display:flex; align-items:center; justify-content:center;
+      font-size:20px; font-weight:bold;
+      cursor:pointer;
+    }
     .removeBtn {
       background:red; color:#fff; border:none; padding:4px 8px;
       cursor:pointer; position:absolute; top:5px; right:5px;
@@ -105,7 +112,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
   <script>
     // Firebase Config
@@ -114,4 +120,52 @@
       authDomain: "uchoosetube-46d9d.firebaseapp.com",
       projectId: "uchoosetube-46d9d",
       storageBucket: "uchoosetube-46d9d.firebasestorage.app",
-      messagingSenderId:
+      messagingSenderId: "929416721212",
+      appId: "1:929416721212:web:560e3afc0c5f865c916439",
+      measurementId: "G-TBMM32CHBF"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    // AUTH FUNCTIONS
+    function login() {
+      const email = document.getElementById("loginEmail").value;
+      const password = document.getElementById("loginPassword").value;
+      auth.signInWithEmailAndPassword(email, password)
+        .catch(err => alert(err.message));
+    }
+
+    function register() {
+      const email = document.getElementById("registerEmail").value;
+      const password = document.getElementById("registerPassword").value;
+      auth.createUserWithEmailAndPassword(email, password)
+        .catch(err => alert(err.message));
+    }
+
+    function logout() {
+      auth.signOut();
+    }
+
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        document.getElementById("authSection").style.display = "none";
+        document.getElementById("appSection").style.display = "block";
+        document.getElementById("logoutBtn").style.display = "block";
+        showAllVideos();
+      } else {
+        document.getElementById("authSection").style.display = "block";
+        document.getElementById("appSection").style.display = "none";
+        document.getElementById("logoutBtn").style.display = "none";
+      }
+    });
+  </script>
+
+  <!-- Your existing video/folder script goes here -->
+  <script>
+    // Keep your existing video/folder JS here
+    // (reuse your "videos", localStorage, add/remove/lock functions)
+  </script>
+</body>
+</html>
