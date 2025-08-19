@@ -1,73 +1,78 @@
-body {
-  margin: 0;
-  font-family: 'Comic Sans MS', cursive, sans-serif;
-  text-align: center;
-}
+<body>
+  <!-- 🌈 Vault Opening Screen -->
+  <div id="vaultScreen" class="vault-screen">
+    <h1 class="vault-title">🌟 Uchoosetube 🌟</h1>
+    <p class="vault-subtitle">☀️ A safe place to watch only what YOU choose 🌈</p>
 
-/* 🌈 Vault Screen Styling */
-.vault-screen {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  background: linear-gradient(135deg, #ff9a9e, #fad0c4, #fbc2eb, #a6c1ee, #84fab0, #8fd3f4);
-  background-size: 400% 400%;
-  animation: rainbow 12s ease infinite;
-}
+    <!-- Vault Button -->
+    <button id="openVaultBtn" class="vault-btn" onclick="openVault()">🔑 OPEN VAULT</button>
 
-@keyframes rainbow {
-  0%{background-position:0% 50%}
-  50%{background-position:100% 50%}
-  100%{background-position:0% 50%}
-}
+    <!-- PIN entry -->
+    <div id="pinEntry" class="pin-entry" style="display:none;">
+      <p id="pinMessage">Enter your 4-digit PIN</p>
+      <input type="password" id="pinInput" maxlength="4" class="pin-input">
+      <button class="vault-btn" onclick="submitPin()">✅ Unlock</button>
+    </div>
+  </div>
 
-.vault-title {
-  font-size: 4em;
-  margin-bottom: 20px;
-  color: #fff;
-  text-shadow: 3px 3px 6px rgba(0,0,0,0.4);
-}
+  <!-- 📂 Main App Content -->
+  <div id="appContent" style="display:none;">
+    <h1 class="app-title">🌈 Uchoosetube</h1>
+    <div id="foldersContainer" class="folders"></div>
+    <div id="videoContainer" class="videos" style="display:none;"></div>
+    <button id="addBtn" onclick="showAddForm()" class="addBtn">➕</button>
 
-.vault-subtitle {
-  font-size: 2em;
-  margin-bottom: 40px;
-  color: #ffffcc;
-}
+    <!-- Add video form -->
+    <div id="adminSection" style="display:none;">
+      <form id="videoForm" class="video-form">
+        <input type="text" id="url" placeholder="🎬 Paste YouTube Link" required>
+        <input type="text" id="title" placeholder="📺 Video Title">
+        <input type="text" id="folder" placeholder="📂 Folder (e.g. Cartoons)">
+        <button type="submit" class="addVideoBtn">✅ Add Video</button>
+      </form>
+    </div>
+  </div>
 
-.vault-btn {
-  font-size: 2em;
-  padding: 20px 40px;
-  margin-top: 20px;
-  border-radius: 50px;
-  background: gold;
-  border: 4px solid orange;
-  cursor: pointer;
-  box-shadow: 0 8px 16px rgba(0,0,0,0.3);
-  transition: transform 0.2s, background 0.2s;
-}
+  <script>
+    let isNewUser = !localStorage.getItem("vaultPin");
 
-.vault-btn:hover {
-  transform: scale(1.1);
-  background: #fff176;
-}
+    function openVault() {
+      document.getElementById("openVaultBtn").style.display = "none";
+      document.getElementById("pinEntry").style.display = "block";
+      document.getElementById("pinMessage").innerText =
+        isNewUser ? "✨ Create a new 4-digit PIN ✨" : "Enter your 4-digit PIN";
+    }
 
-/* 🔢 PIN Entry */
-.pin-entry {
-  margin-top: 30px;
-}
+    function submitPin() {
+      let enteredPin = document.getElementById("pinInput").value;
 
-.pin-entry p {
-  font-size: 1.5em;
-  margin-bottom: 10px;
-  color: #fff;
-}
+      if (enteredPin.length !== 4) {
+        alert("PIN must be 4 digits!");
+        return;
+      }
 
-.pin-input {
-  font-size: 2em;
-  text-align: center;
-  padding: 10px;
-  border-radius: 15px;
-  border: 2px solid #ffcc80;
-  margin-bottom: 15px;
-}
+      if (isNewUser) {
+        localStorage.setItem("vaultPin", enteredPin);
+        alert("🎉 PIN created! Welcome to your vault.");
+        unlockVault();
+      } else {
+        let storedPin = localStorage.getItem("vaultPin");
+        if (enteredPin === storedPin) {
+          unlockVault();
+        } else {
+          alert("❌ Wrong PIN! Try again.");
+        }
+      }
+    }
+
+    function unlockVault() {
+      document.getElementById("vaultScreen").style.display = "none";
+      document.getElementById("appContent").style.display = "block";
+    }
+
+    function showAddForm() {
+      const form = document.getElementById("adminSection");
+      form.style.display = form.style.display === "block" ? "none" : "block";
+    }
+  </script>
+</body>
