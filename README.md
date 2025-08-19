@@ -10,17 +10,24 @@
     #foldersContainer, #videoContainer {
       display: flex; flex-wrap: wrap; gap:15px; justify-content:center;
     }
+    /* Folder cards */
     .folderCard {
       width:120px; height:100px;
-      background:#fff; border-radius:12px;
+      background:#fff;
+      border-radius:12px;
       box-shadow:0 4px 8px rgba(0,0,0,0.1);
       display:flex; flex-direction:column;
       justify-content:center; align-items:center;
       cursor:pointer; transition:transform 0.2s;
     }
     .folderCard:hover { transform:scale(1.05); }
-    .folderIcon { font-size:40px; }
-    .folderName { font-weight:bold; margin-top:5px; font-size:14px; text-align:center; }
+    .folderIcon {
+      font-size:40px;
+    }
+    .folderName {
+      font-weight:bold; margin-top:5px; font-size:14px; text-align:center;
+    }
+    /* Video cards */
     .videoCard {
       background:#fff; border:1px solid #ccc;
       border-radius:6px; overflow:hidden; width:300px;
@@ -40,6 +47,7 @@
       cursor:pointer; position:absolute; top:5px; right:5px;
       border-radius:4px;
     }
+    /* Floating action button (+) */
     #addBtn {
       position:fixed; bottom:20px; right:20px;
       width:50px; height:50px;
@@ -47,7 +55,8 @@
       border:none; border-radius:50%;
       font-size:28px; font-weight:bold;
       box-shadow:0 4px 8px rgba(0,0,0,0.2);
-      cursor:pointer; display:flex; justify-content:center; align-items:center;
+      cursor:pointer; display:none;
+      justify-content:center; align-items:center;
     }
     #homeBtn {
       position:fixed; top:10px; left:10px;
@@ -62,20 +71,26 @@
 <body>
   <h1>🎒 Kids Video Locker</h1>
 
-  <button id="homeBtn" onclick="showAllVideos()">🏠 Home</button>
+  <!-- Home button -->
+  <button id="homeBtn" onclick="showFolders()">🏠 Home</button>
 
+  <!-- Add form -->
   <div id="adminSection">
     <form id="videoForm">
       <input type="text" id="url" placeholder="YouTube link" required style="width:100%;"><br>
       <input type="text" id="title" placeholder="Title (optional)" style="width:100%;"><br>
-      <input type="text" id="folder" placeholder="Folder name (optional)" style="width:100%;"><br>
+      <input type="text" id="folder" placeholder="Folder name (e.g. Cartoons)" style="width:100%;"><br>
       <button type="submit">Add Video</button>
     </form>
   </div>
 
-  <div id="videoContainer"></div>
-  <div id="foldersContainer" style="display:none;"></div>
+  <!-- Folder grid -->
+  <div id="foldersContainer"></div>
 
+  <!-- Folder contents -->
+  <div id="videoContainer" style="display:none;"></div>
+
+  <!-- Floating + button -->
   <button id="addBtn" onclick="showAddForm()">+</button>
 
   <script>
@@ -84,11 +99,7 @@
 
     try {
       var saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        videos = JSON.parse(saved);
-        // Migration: ensure a folder value exists
-        videos = videos.map(v => { if (!v.folder) v.folder = "General"; return v; });
-      }
+      if (saved) videos = JSON.parse(saved);
     } catch(e){ videos = []; }
 
     function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(videos)); }
@@ -100,94 +111,17 @@
       return null;
     }
 
-    // Render all videos on main screen
-    function showAllVideos() {
-      document.getElementById("foldersContainer").style.display = "none";
-      document.getElementById("videoContainer").style.display = "flex";
-      document.getElementById("adminSection").style.display = "none";
-      document.getElementById("homeBtn").style.display = "none";
-      document.getElementById("addBtn").style.display = "flex";
-
-      var container = document.getElementById("videoContainer");
-      container.innerHTML = "";
-
-      if (videos.length === 0) {
-        container.innerHTML = "<p style='text-align:center;width:100%'>No videos yet. Use + to add some!</p>";
-        return;
-      }
-
-      videos.forEach(v => {
-        var card = document.createElement("div");
-        card.className = "videoCard";
-
-        var title = document.createElement("div");
-        title.className = "title";
-        title.textContent = v.title;
-        card.appendChild(title);
-
-        if (v.locked) {
-          var thumb = document.createElement("img");
-          thumb.src = "https://img.youtube.com/vi/" + v.vid + "/hqdefault.jpg";
-          card.appendChild(thumb);
-
-          var overlay = document.createElement("div");
-          overlay.className = "lockOverlay";
-          overlay.textContent = "🔒 Locked";
-          overlay.onclick = function(id){
-            return function() {
-              var pin = prompt("Enter PIN (9999):");
-              if (pin === "9999") {
-                videos = videos.map(x => x.id==id ? {...x, locked:false} : x);
-                save(); showAllVideos();
-              } else { alert("Wrong PIN"); }
-            };
-          }(v.id);
-          card.appendChild(overlay);
-
-        } else {
-          var iframe = document.createElement("iframe");
-          iframe.width = "100%";
-          iframe.height = "200";
-          iframe.src = "https://www.youtube-nocookie.com/embed/" + v.vid + "?rel=0&modestbranding=1&controls=1";
-          iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
-          iframe.allowFullscreen = true;
-          card.appendChild(iframe);
-        }
-
-        var removeBtn = document.createElement("button");
-        removeBtn.className = "removeBtn";
-        removeBtn.textContent = "X";
-        removeBtn.onclick = function(id){
-          return function() {
-            if (confirm("Remove this video?")) {
-              videos = videos.filter(v => v.id !== id);
-              save(); showAllVideos();
-            }
-          };
-        }(v.id);
-        card.appendChild(removeBtn);
-
-        container.appendChild(card);
-      });
-    }
-
-    // Render folders (when user wants to see them)
-    function showFolders() {
-      document.getElementById("videoContainer").style.display = "none";
-      document.getElementById("adminSection").style.display = "none";
-      document.getElementById("foldersContainer").style.display = "flex";
-      document.getElementById("homeBtn").style.display = "block";
-      document.getElementById("addBtn").style.display = "flex";
-
+    function renderFolders() {
       var container = document.getElementById("foldersContainer");
       container.innerHTML = "";
 
-      var folderNames = [...new Set(videos.map(v => v.folder))];
+      var folders = {};
+      videos.forEach(v => { if (!folders[v.folder]) folders[v.folder] = []; });
 
-      folderNames.forEach(folderName => {
+      for (var folderName in folders) {
         var card = document.createElement("div");
         card.className = "folderCard";
-        card.onclick = function(){ showFolderContents(folderName); };
+        card.onclick = function(name){ return function(){ showFolderContents(name); }; }(folderName);
 
         var icon = document.createElement("div");
         icon.className = "folderIcon";
@@ -200,7 +134,7 @@
         card.appendChild(nameDiv);
 
         container.appendChild(card);
-      });
+      }
     }
 
     function showFolderContents(folderName) {
@@ -238,6 +172,7 @@
             };
           }(v.id);
           card.appendChild(overlay);
+
         } else {
           var iframe = document.createElement("iframe");
           iframe.width = "100%";
@@ -267,10 +202,19 @@
 
     function showAddForm() {
       document.getElementById("adminSection").style.display = "block";
-      document.getElementById("videoContainer").style.display = "none";
       document.getElementById("foldersContainer").style.display = "none";
+      document.getElementById("videoContainer").style.display = "none";
       document.getElementById("homeBtn").style.display = "block";
       document.getElementById("addBtn").style.display = "none";
+    }
+
+    function showFolders() {
+      document.getElementById("adminSection").style.display = "none";
+      document.getElementById("videoContainer").style.display = "none";
+      document.getElementById("foldersContainer").style.display = "flex";
+      document.getElementById("homeBtn").style.display = "none";
+      document.getElementById("addBtn").style.display = "flex";
+      renderFolders();
     }
 
     document.getElementById("videoForm").onsubmit = function(e){
@@ -281,11 +225,10 @@
       var vid = extractYouTubeId(url);
       if (!vid) { alert("Invalid YouTube URL"); return; }
       videos.unshift({id: new Date().getTime(), vid: vid, title: title, folder: folder, locked: true});
-      save(); showAllVideos();
+      save(); showFolders();
     };
 
-    // ✅ Default to all videos on load
-    showAllVideos();
+    showFolders(); // start on folder view
   </script>
 </body>
 </html>
