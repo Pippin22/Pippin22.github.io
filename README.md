@@ -1,55 +1,73 @@
-<body>
-  <!-- 🌈 Vault Opening Screen -->
-  <div id="vaultScreen" class="vault-screen">
-    <h1 class="vault-title">🌟 Uchoosetube 🌟</h1>
-    <p class="vault-subtitle">☀️ A safe place to watch only what YOU choose 🌈</p>
+body {
+  margin: 0;
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+  text-align: center;
+}
 
-    <!-- Vault Button -->
-    <button class="vault-btn" onclick="showPinPad()">🔑 OPEN VAULT</button>
+/* 🌈 Vault Screen Styling */
+.vault-screen {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #ff9a9e, #fad0c4, #fbc2eb, #a6c1ee, #84fab0, #8fd3f4);
+  background-size: 400% 400%;
+  animation: rainbow 12s ease infinite;
+}
 
-    <!-- Cartoon PIN Pad -->
-    <div id="pinPad" class="pin-pad" style="display:none;">
-      <p id="pinMessage" class="pin-message">Enter your 4-digit PIN</p>
-      <div class="pin-dots" id="pinDots">____</div>
-      <div class="pin-buttons">
-        <button onclick="pressPin('1')">1</button>
-        <button onclick="pressPin('2')">2</button>
-        <button onclick="pressPin('3')">3</button>
-        <button onclick="pressPin('4')">4</button>
-        <button onclick="pressPin('5')">5</button>
-        <button onclick="pressPin('6')">6</button>
-        <button onclick="pressPin('7')">7</button>
-        <button onclick="pressPin('8')">8</button>
-        <button onclick="pressPin('9')">9</button>
-        <button onclick="clearPin()">❌</button>
-        <button onclick="pressPin('0')">0</button>
-        <button onclick="submitPin()">✅</button>
-      </div>
-    </div>
-  </div>
+@keyframes rainbow {
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
+}
 
-  <!-- 📂 App Content -->
-  <div id="appContent" style="display:none;">
-    <h1 class="app-title">🌈 Uchoosetube</h1>
-    <div id="foldersContainer" class="folders"></div>
-    <div id="videoContainer" class="videos" style="display:none;"></div>
-    <button id="addBtn" onclick="showAddForm()" class="addBtn">➕</button>
+.vault-title {
+  font-size: 4em;
+  margin-bottom: 20px;
+  color: #fff;
+  text-shadow: 3px 3px 6px rgba(0,0,0,0.4);
+}
 
-    <!-- Add video form -->
-    <div id="adminSection" style="display:none;">
-      <form id="videoForm" class="video-form">
-        <input type="text" id="url" placeholder="🎬 Paste YouTube Link" required>
-        <input type="text" id="title" placeholder="📺 Video Title">
-        <input type="text" id="folder" placeholder="📂 Folder (e.g. Cartoons)">
-        <button type="submit" class="addVideoBtn">✅ Add Video</button>
-      </form>
-    </div>
-  </div>
+.vault-subtitle {
+  font-size: 2em;
+  margin-bottom: 40px;
+  color: #ffffcc;
+}
 
-  <script>
-    let enteredPin = "";
-    let isNewUser = !localStorage.getItem("vaultPin");
+.vault-btn {
+  font-size: 2em;
+  padding: 20px 40px;
+  margin-top: 20px;
+  border-radius: 50px;
+  background: gold;
+  border: 4px solid orange;
+  cursor: pointer;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+  transition: transform 0.2s, background 0.2s;
+}
 
-    function showPinPad() {
-      document.getElementById("pinPad").style.display = "block";
-      document.getElementById("pin
+.vault-btn:hover {
+  transform: scale(1.1);
+  background: #fff176;
+}
+
+/* 🔢 PIN Entry */
+.pin-entry {
+  margin-top: 30px;
+}
+
+.pin-entry p {
+  font-size: 1.5em;
+  margin-bottom: 10px;
+  color: #fff;
+}
+
+.pin-input {
+  font-size: 2em;
+  text-align: center;
+  padding: 10px;
+  border-radius: 15px;
+  border: 2px solid #ffcc80;
+  margin-bottom: 15px;
+}
