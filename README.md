@@ -3,16 +3,17 @@
   <div id="vaultScreen" class="vault-screen">
     <h1 class="vault-title">🌟 Uchoosetube 🌟</h1>
     <p class="vault-subtitle">🔒 A safe place to watch only what YOU choose!</p>
-    <div class="vault-btn" onclick="openVault()"> 
-      <span class="vault-icon">🔑</span> 
-      OPEN VAULT
-    </div>
+    <button class="vault-btn" onclick="openVault()">🔑 OPEN VAULT</button>
   </div>
 
   <!-- 📂 App Content (hidden until vault is opened) -->
   <div id="appContent" style="display:none;">
     <h1 class="app-title">🌈 Uchoosetube</h1>
-    
+    <div id="foldersContainer" class="folders"></div>
+    <div id="videoContainer" class="videos" style="display:none;"></div>
+    <button id="addBtn" onclick="showAddForm()" class="addBtn">➕</button>
+
+    <!-- Add video form -->
     <div id="adminSection" style="display:none;">
       <form id="videoForm" class="video-form">
         <input type="text" id="url" placeholder="🎬 Paste YouTube Link" required>
@@ -21,12 +22,6 @@
         <button type="submit" class="addVideoBtn">✅ Add Video</button>
       </form>
     </div>
-
-    <div id="foldersContainer" class="folders"></div>
-    <div id="videoContainer" class="videos" style="display:none;"></div>
-
-    <!-- Floating Add Button -->
-    <button id="addBtn" onclick="showAddForm()" class="addBtn">➕</button>
   </div>
 
   <script>
@@ -48,11 +43,4 @@
           document.getElementById("vaultScreen").style.display = "none";
           document.getElementById("appContent").style.display = "block";
         } else {
-          alert("Incorrect PIN.");
-        }
-      }
-    }
-
-    function showAddForm() {
-      const form = document.getElementById("adminSection");
-      form.style.display = form.style.display ===
+          alert("
