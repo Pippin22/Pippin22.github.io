@@ -1,4 +1,3 @@
-
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -71,10 +70,8 @@
 <body>
   <h1>🎒 Kids Video Locker</h1>
 
-  <!-- Home button -->
   <button id="homeBtn" onclick="showFolders()">🏠 Home</button>
 
-  <!-- Add form -->
   <div id="adminSection">
     <form id="videoForm">
       <input type="text" id="url" placeholder="YouTube link" required style="width:100%;"><br>
@@ -84,13 +81,10 @@
     </form>
   </div>
 
-  <!-- Folder grid -->
   <div id="foldersContainer"></div>
 
-  <!-- Folder contents -->
   <div id="videoContainer" style="display:none;"></div>
 
-  <!-- Floating + button -->
   <button id="addBtn" onclick="showAddForm()">+</button>
 
   <script>
