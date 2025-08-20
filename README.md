@@ -210,7 +210,7 @@
     var PIN_KEY = "vault_pin";
     var videos = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
     var enteredPin = "";
-    var pinMode = "enter"; // can be "enter" or "change"
+    var pinMode = "enter"; // can be "vault", "settings", or "change"
 
     function save(){
       localStorage.setItem(STORAGE_KEY, JSON.stringify(videos));
@@ -270,6 +270,26 @@
       renderFolders();
     }
 
+    // New functions to manage different sections
+    function accessVault() {
+      document.getElementById("intro").style.display = "none";
+      document.getElementById("foldersContainer").style.display = "flex";
+      document.getElementById("addBtn").style.display = "block";
+      document.getElementById("settingsBtn").style.display = "block";
+      renderFolders();
+    }
+
+    function accessSettings() {
+      document.getElementById("intro").style.display = "none";
+      document.getElementById("settingsContainer").style.display = "flex";
+      document.getElementById("addBtn").style.display = "block";
+      document.getElementById("settingsBtn").style.display = "block";
+    }
+
+    function closePinOverlay(){
+      document.getElementById("pinOverlay").style.display="none";
+    }
+
     // PIN keypad
     document.querySelectorAll(".pinBtn").forEach(btn=>{
       btn.onclick=()=>{
@@ -281,32 +301,38 @@
             localStorage.setItem(PIN_KEY, enteredPin);
             closePinOverlay();
             alert("PIN changed successfully!");
-          } else if(!savedPin){ // set new pin
-            localStorage.setItem(PIN_KEY,enteredPin);
-            closePinOverlay();
-          } else if(enteredPin===savedPin){
-            closePinOverlay();
-          } else {
-            alert("Wrong PIN");
-            enteredPin="";
-            document.getElementById("pinDisplay").textContent="____";
+          } else if(pinMode === "vault"){
+            if(!savedPin){
+              localStorage.setItem(PIN_KEY, enteredPin);
+              closePinOverlay();
+              accessVault();
+            } else if(enteredPin === savedPin){
+              closePinOverlay();
+              accessVault();
+            } else {
+              alert("Wrong PIN");
+              enteredPin = "";
+              document.getElementById("pinDisplay").textContent="____";
+            }
+          } else if (pinMode === "settings") {
+            if (enteredPin === savedPin) {
+              closePinOverlay();
+              accessSettings();
+            } else {
+              alert("Wrong PIN");
+              enteredPin = "";
+              document.getElementById("pinDisplay").textContent="____";
+            }
           }
         }
       }
     });
 
-    function closePinOverlay(){
-      document.getElementById("pinOverlay").style.display="none";
-      document.getElementById("intro").style.display="none";
-      document.getElementById("foldersContainer").style.display="flex";
-      document.getElementById("addBtn").style.display="block";
-      document.getElementById("settingsBtn").style.display="block";
-      renderFolders();
-    }
-
     document.getElementById("openVaultBtn").onclick=function(){
-      pinMode = "enter";
+      pinMode = "vault";
       document.getElementById("pinOverlay").style.display="flex";
+      document.getElementById("settingsContainer").style.display="none";
+      document.getElementById("foldersContainer").style.display="none";
       enteredPin="";
       document.getElementById("pinDisplay").textContent="____";
       document.getElementById("pinMessage").textContent = localStorage.getItem(PIN_KEY)?"Enter Your PIN":"Create a PIN";
@@ -316,14 +342,17 @@
       pinMode = "change";
       document.getElementById("pinOverlay").style.display="flex";
       document.getElementById("settingsContainer").style.display="none";
+      document.getElementById("foldersContainer").style.display="none";
       enteredPin="";
       document.getElementById("pinDisplay").textContent="____";
       document.getElementById("pinMessage").textContent = "Create a new PIN";
     };
 
     document.getElementById("settingsBtn").onclick=function(){
-      pinMode = "enter";
+      pinMode = "settings";
       document.getElementById("pinOverlay").style.display="flex";
+      document.getElementById("foldersContainer").style.display="none";
+      document.getElementById("settingsContainer").style.display="none";
       enteredPin="";
       document.getElementById("pinDisplay").textContent="____";
       document.getElementById("pinMessage").textContent = localStorage.getItem(PIN_KEY)?"Enter Your PIN to access settings":"Create a PIN";
@@ -338,4 +367,3 @@
     };
   </script>
 </body>
-</html>
