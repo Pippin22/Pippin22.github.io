@@ -210,7 +210,7 @@
     var PIN_KEY = "vault_pin";
     var videos = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
     var enteredPin = "";
-    var pinMode = "enter"; // can be "vault", "settings", or "change"
+    var pinMode = "enter"; // can be "vault", "settings", or "admin"
 
     function save(){
       localStorage.setItem(STORAGE_KEY, JSON.stringify(videos));
@@ -267,13 +267,15 @@
       videos.unshift({id:Date.now(),vid:vid,title:title,folder:folder});
       save();
       document.getElementById("adminSection").style.display="none";
-      renderFolders();
+      accessVault(); // Return to the vault view after adding
     }
 
     // New functions to manage different sections
     function accessVault() {
       document.getElementById("intro").style.display = "none";
+      document.getElementById("settingsContainer").style.display = "none";
       document.getElementById("foldersContainer").style.display = "flex";
+      document.getElementById("videoContainer").style.display = "none";
       document.getElementById("addBtn").style.display = "block";
       document.getElementById("settingsBtn").style.display = "block";
       renderFolders();
@@ -281,9 +283,21 @@
 
     function accessSettings() {
       document.getElementById("intro").style.display = "none";
+      document.getElementById("foldersContainer").style.display = "none";
+      document.getElementById("videoContainer").style.display = "none";
       document.getElementById("settingsContainer").style.display = "flex";
       document.getElementById("addBtn").style.display = "block";
       document.getElementById("settingsBtn").style.display = "block";
+    }
+    
+    function accessAdmin() {
+      document.getElementById("intro").style.display = "none";
+      document.getElementById("foldersContainer").style.display = "none";
+      document.getElementById("videoContainer").style.display = "none";
+      document.getElementById("settingsContainer").style.display = "none";
+      document.getElementById("addBtn").style.display = "block";
+      document.getElementById("settingsBtn").style.display = "block";
+      document.getElementById("adminSection").style.display = "block";
     }
 
     function closePinOverlay(){
@@ -318,6 +332,15 @@
             if (enteredPin === savedPin) {
               closePinOverlay();
               accessSettings();
+            } else {
+              alert("Wrong PIN");
+              enteredPin = "";
+              document.getElementById("pinDisplay").textContent="____";
+            }
+          } else if (pinMode === "admin") {
+            if (enteredPin === savedPin) {
+              closePinOverlay();
+              accessAdmin();
             } else {
               alert("Wrong PIN");
               enteredPin = "";
@@ -360,10 +383,17 @@
 
     // Add Video button logic
     document.getElementById("addBtn").onclick=function(){
-      document.getElementById("adminSection").style.display="block";
+      pinMode = "admin";
+      document.getElementById("pinOverlay").style.display="flex";
+      document.getElementById("foldersContainer").style.display="none";
+      document.getElementById("settingsContainer").style.display="none";
+      enteredPin = "";
+      document.getElementById("pinDisplay").textContent = "____";
+      document.getElementById("pinMessage").textContent = localStorage.getItem(PIN_KEY) ? "Enter Your PIN to add videos" : "Create a PIN";
     };
     document.getElementById("closeAdminBtn").onclick=function(){
       document.getElementById("adminSection").style.display="none";
     };
   </script>
 </body>
+
