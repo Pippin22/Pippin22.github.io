@@ -260,4 +260,3 @@
     document.getElementById("pinMessage").textContent = localStorage.getItem(PIN_KEY)?"Enter Your PIN":"Create a PIN";
   };
 </script></body>
-</html>
