@@ -190,7 +190,7 @@
     <h2>Settings</h2>
     <p>Manage app settings and account details.</p>
     <button id="changePinBtn">Change PIN</button>
-    <button id="donateBtn" onclick="window.open('https://www.paypal.com/donate/?business=steve_parmenter@hotmail.com','_blank')">💛 Donate to PayPal</button>
+    <button id="donateBtn" onclick="window.open('https://www.paypal.com/donate/?business=olarelectricalsupply@gmail.com','_blank')">💛 Donate to PayPal</button>
   </div>
   <button id="addBtn" class="fixed-button">+</button>
   <button id="settingsBtn" class="fixed-button">⚙️</button>
